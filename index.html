@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Client Onboarding — Sujal Sandeep Pednekar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --paper: #faf8f3;
+    --cream: #f2ede3;
+    --gold: #c9a84c;
+    --gold-light: #e8d5a3;
+    --muted: #6b6459;
+    --border: #d9d2c5;
+    --accent: #1a1207;
+    --success: #2d6a4f;
+    --error: #c1440e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--accent);
+    color: #fff;
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(201,168,76,0.04) 40px,
+      rgba(201,168,76,0.04) 41px
+    );
+  }
+  .header-badge {
+    display: inline-block;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0.35rem 1rem;
+    border-radius: 2px;
+    margin-bottom: 1.2rem;
+    font-weight: 500;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: #fff;
+  }
+  .header h1 span { color: var(--gold); }
+  .header p {
+    margin-top: 0.8rem;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.55);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+  }
+  .designer-sig {
+    margin-top: 1.5rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--gold-light);
+    opacity: 0.8;
+    font-style: italic;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap {
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .progress-steps {
+    display: flex;
+    gap: 0.4rem;
+    flex: 1;
+  }
+  .step-dot {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    transition: background 0.4s;
+  }
+  .step-dot.active { background: var(--gold); }
+  .step-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    display: none;
+    animation: fadeUp 0.4s ease both;
+  }
+  .section.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number {
+    width: 2.2rem;
+    height: 2.2rem;
+    background: var(--gold);
+    color: var(--accent);
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .section-sub {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 0.1rem;
+    font-weight: 400;
+  }
+
+  /* ── FIELDS ── */
+  .field-group {
+    display: grid;
+    gap: 1.4rem;
+    margin-bottom: 1.4rem;
+  }
+  .field-group.cols-2 { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 560px) { .field-group.cols-2 { grid-template-columns: 1fr; } }
+
+  .field label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 0.45rem;
+  }
+  .field label .req { color: var(--gold); margin-left: 2px; }
+
+  .field input,
+  .field textarea,
+  .field select {
+    width: 100%;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+  .field input:focus,
+  .field textarea:focus,
+  .field select:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+  }
+  .field input.error,
+  .field textarea.error { border-color: var(--error); }
+
+  .field textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
+
+  .field-hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.35rem;
+  }
+  .field-error {
+    font-size: 0.75rem;
+    color: var(--error);
+    margin-top: 0.35rem;
+    display: none;
+  }
+
+  /* ── CHECKBOXES ── */
+  .check-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.7rem;
+    margin-top: 0.5rem;
+  }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.7rem 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    user-select: none;
+  }
+  .check-item:hover { border-color: var(--gold-light); }
+  .check-item input[type="checkbox"] { display: none; }
+  .check-item.checked {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.07);
+  }
+  .check-box {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: border-color 0.2s, background 0.2s;
+    font-size: 0.7rem;
+    color: #fff;
+  }
+  .check-item.checked .check-box {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+  .check-label { font-size: 0.88rem; font-weight: 500; }
+  .check-item .check-box::after { content: ''; }
+  .check-item.checked .check-box::after { content: '✓'; }
+
+  /* ── BUDGET CARD ── */
+  .budget-card {
+    background: var(--accent);
+    border-radius: 10px;
+    padding: 1.5rem;
+    color: #fff;
+    margin-top: 1rem;
+  }
+  .budget-card h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--gold-light);
+    margin-bottom: 1.2rem;
+    font-weight: 700;
+  }
+  .budget-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    font-size: 0.88rem;
+  }
+  .budget-row:last-child { border-bottom: none; }
+  .budget-row .label { color: rgba(255,255,255,0.55); }
+  .budget-row .value { font-weight: 600; color: var(--gold); font-size: 1rem; }
+
+  /* ── TERMS ── */
+  .terms-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    margin-top: 0.5rem;
+  }
+  .term-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    user-select: none;
+  }
+  .term-item:hover { border-color: var(--gold-light); }
+  .term-item.checked { border-color: var(--gold); background: rgba(201,168,76,0.05); }
+  .term-item input[type="checkbox"] { display: none; }
+  .term-check-box {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-size: 0.7rem;
+    color: #fff;
+    transition: all 0.2s;
+  }
+  .term-item.checked .term-check-box { background: var(--gold); border-color: var(--gold); }
+  .term-text { font-size: 0.85rem; line-height: 1.5; color: var(--ink); }
+
+  .accept-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: 1px dashed var(--gold);
+    color: var(--gold);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: background 0.2s;
+  }
+  .accept-all-btn:hover { background: rgba(201,168,76,0.08); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1.8rem 0;
+  }
+
+  /* ── NAVIGATION ── */
+  .nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 0.75rem 1.8rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-outline:hover { border-color: var(--ink); color: var(--ink); }
+  .btn-primary {
+    background: var(--gold);
+    color: var(--accent);
+  }
+  .btn-primary:hover { background: #b8952a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(201,168,76,0.3); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-dark {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-dark:hover { background: #2d200e; }
+  .btn-success {
+    background: var(--success);
+    color: #fff;
+  }
+
+  /* ── REVIEW CARD ── */
+  .review-section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 1.5rem 0 0.8rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .review-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1.5rem;
+  }
+  @media (max-width: 500px) { .review-grid { grid-template-columns: 1fr; } }
+  .review-item { padding: 0.4rem 0; }
+  .review-item .r-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+  }
+  .review-item .r-value { font-size: 0.9rem; color: var(--ink); font-weight: 500; }
+  .review-item .r-value.empty { color: var(--muted); font-style: italic; font-weight: 400; }
+
+  /* ── PAYMENT SUMMARY ── */
+  .payment-summary {
+    background: var(--accent);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 1.5rem;
+  }
+  .payment-summary-header {
+    background: var(--gold);
+    padding: 0.8rem 1.5rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+  .payment-summary-body { padding: 1.2rem 1.5rem; }
+  .ps-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    font-size: 0.88rem;
+  }
+  .ps-row:last-child { border-bottom: none; font-size: 1rem; padding-top: 1rem; }
+  .ps-row .ps-label { color: rgba(255,255,255,0.55); }
+  .ps-row .ps-value { color: var(--gold); font-weight: 600; }
+  .ps-row:last-child .ps-value { font-size: 1.1rem; }
+
+  /* ── SUCCESS ── */
+  .success-wrap {
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+  .success-icon {
+    width: 70px; height: 70px;
+    background: rgba(45,106,79,0.1);
+    border: 2px solid var(--success);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto 1.5rem;
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  @keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .success-wrap h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .success-wrap p { color: var(--muted); font-size: 0.9rem; line-height: 1.6; max-width: 400px; margin: 0 auto 2rem; }
+  .pdf-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.85rem 2rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    margin: 0.4rem;
+  }
+  .pdf-btn:hover { background: #2d200e; transform: translateY(-1px); }
+  .pdf-btn.gold { background: var(--gold); color: var(--accent); }
+  .pdf-btn.gold:hover { background: #b8952a; }
+
+  /* ── INLINE "OTHER" INPUT ── */
+  .other-input-wrap { margin-top: 0.7rem; display: none; }
+  .other-input-wrap.show { display: block; }
+
+  /* ── RADIO GROUP ── */
+  .radio-group {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .radio-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .radio-item input { display: none; }
+  .radio-item.selected { border-color: var(--gold); background: rgba(201,168,76,0.07); color: var(--accent); }
+  .radio-dot {
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .radio-item.selected .radio-dot {
+    border-color: var(--gold);
+    background: var(--gold);
+    box-shadow: inset 0 0 0 2.5px #fff;
+  }
+
+  /* ── CURRENCY PREFIX ── */
+  .input-prefix-wrap { position: relative; }
+  .input-prefix-wrap .prefix {
+    position: absolute;
+    left: 1rem; top: 50%;
+    transform: translateY(-50%);
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 0.9rem;
+    pointer-events: none;
+  }
+  .input-prefix-wrap input { padding-left: 1.8rem; }
+
+  /* mobile */
+  @media (max-width: 640px) {
+    .progress-wrap { padding: 0.8rem 1rem; }
+    .container { padding: 2rem 1rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-badge">Client Onboarding Form</div>
+  <h1>Let's Build <span>Something</span> Great</h1>
+  <p>Complete the form below to kick off your design project</p>
+  <div class="designer-sig">— Sujal Sandeep Pednekar</div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress-steps">
+    <div class="step-dot active" id="dot-0"></div>
+    <div class="step-dot" id="dot-1"></div>
+    <div class="step-dot" id="dot-2"></div>
+    <div class="step-dot" id="dot-3"></div>
+    <div class="step-dot" id="dot-4"></div>
+  </div>
+  <span class="step-label" id="step-label-text">Step 1 of 5</span>
+</div>
+
+<div class="container">
+
+  <!-- ── SECTION 1: CLIENT INFO ── -->
+  <div class="section active" id="sec-0">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div>
+        <div class="section-title">Client Information</div>
+        <div class="section-sub">Tell us a bit about yourself</div>
+      </div>
+    </div>
+
+    <div class="field-group cols-2">
+      <div class="field">
+        <label>Full Name <span class="req">*</span></label>
+        <input type="text" id="clientName" placeholder="e.g. Priya Sharma" />
+        <div class="field-error" id="err-clientName">Please enter your full name.</div>
+      </div>
+      <div class="field">
+        <label>Business Name <span style="font-weight:300;text-transform:none;letter-spacing:0;">(Optional)</span></label>
+        <input type="text" id="businessName" placeholder="e.g. Bloom Studio" />
+      </div>
+    </div>
+    <div class="field-group cols-2">
+      <div class="field">
+        <label>Email Address <span class="req">*</span></label>
+        <input type="email" id="clientEmail" placeholder="hello@example.com" />
+        <div class="field-error" id="err-clientEmail">Please enter a valid email.</div>
+      </div>
+      <div class="field">
+        <label>WhatsApp Number <span class="req">*</span></label>
+        <input type="tel" id="clientPhone" placeholder="+91 99999 99999" />
+        <div class="field-error" id="err-clientPhone">Please enter your WhatsApp number.</div>
+      </div>
+    </div>
+    <div class="field-group">
+      <div class="field">
+        <label>Instagram / Website <span style="font-weight:300;text-transform:none;letter-spacing:0;">(Optional)</span></label>
+        <input type="text" id="clientSocial" placeholder="@yourbrand or https://yourwebsite.com" />
+      </div>
+    </div>
+
+    <div class="nav-bar">
+      <span></span>
+      <button class="btn btn-primary" onclick="next(0)">Continue &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ── SECTION 2: PROJECT DETAILS ── -->
+  <div class="section" id="sec-1">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div>
+        <div class="section-title">Project Details</div>
+        <div class="section-sub">Help me understand your vision</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Service Required <span class="req">*</span></label>
+      <div class="field-error" id="err-service">Please select at least one service.</div>
+      <div class="check-grid" style="margin-top:0.5rem;">
+        <div class="check-item" data-value="Logo Design">
+          <div class="check-box"></div>
+          <span class="check-label">Logo Design</span>
+        </div>
+        <div class="check-item" data-value="Social Media Creatives">
+          <div class="check-box"></div>
+          <span class="check-label">Social Media Creatives</span>
+        </div>
+        <div class="check-item" data-value="Branding Kit">
+          <div class="check-box"></div>
+          <span class="check-label">Branding Kit</span>
+        </div>
+        <div class="check-item" data-value="Flyer / Poster / Banner">
+          <div class="check-box"></div>
+          <span class="check-label">Flyer / Poster / Banner</span>
+        </div>
+        <div class="check-item" data-value="Website Design">
+          <div class="check-box"></div>
+          <span class="check-label">Website Design</span>
+        </div>
+        <div class="check-item" data-value="Other" id="other-service-item">
+          <div class="check-box"></div>
+          <span class="check-label">Other</span>
+        </div>
+      </div>
+      <div class="other-input-wrap" id="other-service-wrap">
+        <div class="field">
+          <input type="text" id="otherService" placeholder="Describe the service…" />
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="field-group">
+      <div class="field">
+        <label>Project Description <span class="req">*</span></label>
+        <textarea id="projectDesc" placeholder="Describe your project in detail — purpose, audience, what you need…"></textarea>
+        <div class="field-error" id="err-projectDesc">Please describe your project.</div>
+      </div>
+    </div>
+
+    <div class="field-group cols-2">
+      <div class="field">
+        <label>Preferred Style / References</label>
+        <textarea id="styleRef" placeholder="Paste links or describe the look you're going for…" style="min-height:80px;"></textarea>
+      </div>
+      <div class="field">
+        <label>Deadline / Delivery Date <span class="req">*</span></label>
+        <input type="date" id="deadline" />
+        <div class="field-error" id="err-deadline">Please provide a deadline.</div>
+      </div>
+    </div>
+
+    <div class="nav-bar">
+      <button class="btn btn-outline" onclick="prev(1)">&larr; Back</button>
+      <button class="btn btn-primary" onclick="next(1)">Continue &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ── SECTION 3: BUDGET ── -->
+  <div class="section" id="sec-2">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div>
+        <div class="section-title">Budget & Payment</div>
+        <div class="section-sub">Transparent pricing, no surprises</div>
+      </div>
+    </div>
+
+    <div class="field-group cols-2">
+      <div class="field">
+        <label>Total Project Price (₹) <span class="req">*</span></label>
+        <div class="input-prefix-wrap">
+          <span class="prefix">₹</span>
+          <input type="number" id="totalPrice" placeholder="0" min="0" oninput="calcPayments()" />
+        </div>
+        <div class="field-error" id="err-totalPrice">Please enter the total price.</div>
+      </div>
+      <div class="field">
+        <label>Advance Payment (50%)</label>
+        <div class="input-prefix-wrap">
+          <span class="prefix">₹</span>
+          <input type="number" id="advanceAmt" placeholder="0" readonly style="background:#f9f7f2;cursor:default;" />
+        </div>
+        <div class="field-hint">Auto-calculated as 50% of total</div>
+      </div>
+    </div>
+
+    <div class="field-group cols-2">
+      <div class="field">
+        <label>Remaining Payment</label>
+        <div class="input-prefix-wrap">
+          <span class="prefix">₹</span>
+          <input type="number" id="remainingAmt" placeholder="0" readonly style="background:#f9f7f2;cursor:default;" />
+        </div>
+        <div class="field-hint">Due before final file delivery</div>
+      </div>
+      <div class="field">
+        <label>Additional Revision Charge (₹ per revision)</label>
+        <div class="input-prefix-wrap">
+          <span class="prefix">₹</span>
+          <input type="number" id="revisionCharge" placeholder="e.g. 500" min="0" />
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Preferred Payment Method <span class="req">*</span></label>
+      <div class="field-error" id="err-payMethod">Please select a payment method.</div>
+      <div class="radio-group">
+        <div class="radio-item" data-name="payMethod" data-value="UPI">
+          <div class="radio-dot"></div> UPI
+        </div>
+        <div class="radio-item" data-name="payMethod" data-value="Bank Transfer">
+          <div class="radio-dot"></div> Bank Transfer
+        </div>
+        <div class="radio-item" data-name="payMethod" data-value="Other" id="pm-other-item">
+          <div class="radio-dot"></div> Other
+        </div>
+      </div>
+      <div class="other-input-wrap" id="other-pm-wrap">
+        <div class="field" style="margin-top:0.5rem;">
+          <input type="text" id="otherPayMethod" placeholder="Specify payment method…" />
+        </div>
+      </div>
+    </div>
+
+    <div class="budget-card" id="budgetCard" style="display:none;">
+      <h4>💳 Payment Summary</h4>
+      <div class="budget-row">
+        <span class="label">Total Project Value</span>
+        <span class="value" id="bc-total">₹0</span>
+      </div>
+      <div class="budget-row">
+        <span class="label">Advance (to start work)</span>
+        <span class="value" id="bc-advance">₹0</span>
+      </div>
+      <div class="budget-row">
+        <span class="label">Balance (before delivery)</span>
+        <span class="value" id="bc-remaining">₹0</span>
+      </div>
+      <div class="budget-row">
+        <span class="label">Revision charge</span>
+        <span class="value" id="bc-revision">—</span>
+      </div>
+    </div>
+
+    <div class="nav-bar">
+      <button class="btn btn-outline" onclick="prev(2)">&larr; Back</button>
+      <button class="btn btn-primary" onclick="next(2)">Continue &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ── SECTION 4: TERMS ── -->
+  <div class="section" id="sec-3">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div>
+        <div class="section-title">Terms & Agreement</div>
+        <div class="section-sub">Please read and accept all terms to proceed</div>
+      </div>
+    </div>
+
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;line-height:1.6;">This project includes <strong>2 standard revisions</strong> at no extra cost. Review the terms below before signing.</p>
+
+    <button class="accept-all-btn" onclick="acceptAll()">✓ Accept All Terms</button>
+
+    <div class="terms-list">
+      <div class="term-item">
+        <div class="term-check-box">✓</div>
+        <span class="term-text">Work begins only after advance payment is received.</span>
+      </div>
+      <div class="term-item">
+        <div class="term-check-box">✓</div>
+        <span class="term-text">Delivery timeline starts after all required content and files are submitted by the client.</span>
+      </div>
+      <div class="term-item">
+        <div class="term-check-box">✓</div>
+        <span class="term-text">Final editable/source files are not included unless agreed upon separately.</span>
+      </div>
+      <div class="term-item">
+        <div class="term-check-box">✓</div>
+        <span class="term-text">Final files will be delivered only after full payment has been received.</span>
+      </div>
+      <div class="term-item">
+        <div class="term-check-box">✓</div>
+        <span class="term-text">Advance payment is non-refundable once work has started.</span>
+      </div>
+      <div class="term-item">
+        <div class="term-check-box">✓</div>
+        <span class="term-text">Client is responsible for checking all spelling, content accuracy, and approvals before sign-off.</span>
+      </div>
+      <div class="term-item">
+        <div class="term-check-box">✓</div>
+        <span class="term-text">The designer may showcase completed work in portfolio or social media unless privacy is explicitly requested in writing.</span>
+      </div>
+    </div>
+    <div class="field-error" id="err-terms" style="display:none;margin-top:0.7rem;">Please accept all terms to continue.</div>
+
+    <hr class="divider" />
+
+    <div class="field-group cols-2">
+      <div class="field">
+        <label>Full Name (Signature) <span class="req">*</span></label>
+        <input type="text" id="signName" placeholder="Type your full legal name" />
+        <div class="field-error" id="err-signName">Please enter your name as signature.</div>
+      </div>
+      <div class="field">
+        <label>Date</label>
+        <input type="text" id="signDate" readonly style="background:#f9f7f2;cursor:default;" />
+      </div>
+    </div>
+
+    <div class="nav-bar">
+      <button class="btn btn-outline" onclick="prev(3)">&larr; Back</button>
+      <button class="btn btn-primary" onclick="next(3)">Review & Submit &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ── SECTION 5: REVIEW ── -->
+  <div class="section" id="sec-4">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div>
+        <div class="section-title">Review Your Submission</div>
+        <div class="section-sub">Double-check before submitting</div>
+      </div>
+    </div>
+
+    <div class="review-section-title">👤 Client Information</div>
+    <div class="review-grid">
+      <div class="review-item"><div class="r-label">Full Name</div><div class="r-value" id="rv-name"></div></div>
+      <div class="review-item"><div class="r-label">Business</div><div class="r-value" id="rv-biz"></div></div>
+      <div class="review-item"><div class="r-label">Email</div><div class="r-value" id="rv-email"></div></div>
+      <div class="review-item"><div class="r-label">WhatsApp</div><div class="r-value" id="rv-phone"></div></div>
+      <div class="review-item"><div class="r-label">Instagram / Website</div><div class="r-value" id="rv-social"></div></div>
+    </div>
+
+    <div class="review-section-title">🎨 Project Details</div>
+    <div class="review-grid">
+      <div class="review-item"><div class="r-label">Services</div><div class="r-value" id="rv-services"></div></div>
+      <div class="review-item"><div class="r-label">Deadline</div><div class="r-value" id="rv-deadline"></div></div>
+    </div>
+    <div class="review-item" style="margin-top:0.6rem;"><div class="r-label">Project Description</div><div class="r-value" id="rv-desc" style="white-space:pre-wrap;"></div></div>
+    <div class="review-item" style="margin-top:0.6rem;"><div class="r-label">Style / References</div><div class="r-value" id="rv-style"></div></div>
+
+    <!-- PAYMENT SUMMARY -->
+    <div class="payment-summary">
+      <div class="payment-summary-header">💳 Payment Summary</div>
+      <div class="payment-summary-body">
+        <div class="ps-row"><span class="ps-label">Total Project Price</span><span class="ps-value" id="rv-total"></span></div>
+        <div class="ps-row"><span class="ps-label">Advance (50% — to start)</span><span class="ps-value" id="rv-advance"></span></div>
+        <div class="ps-row"><span class="ps-label">Remaining (before delivery)</span><span class="ps-value" id="rv-remaining"></span></div>
+        <div class="ps-row"><span class="ps-label">Payment Method</span><span class="ps-value" id="rv-paymethod"></span></div>
+        <div class="ps-row"><span class="ps-label">Revision Charge</span><span class="ps-value" id="rv-revision"></span></div>
+      </div>
+    </div>
+
+    <div class="review-section-title">✍️ Agreement</div>
+    <div class="review-grid">
+      <div class="review-item"><div class="r-label">Signed By</div><div class="r-value" id="rv-sign"></div></div>
+      <div class="review-item"><div class="r-label">Date</div><div class="r-value" id="rv-signdate"></div></div>
+      <div class="review-item"><div class="r-label">Terms Accepted</div><div class="r-value">All 7 terms accepted ✓</div></div>
+      <div class="review-item"><div class="r-label">Standard Revisions</div><div class="r-value">2 revisions included</div></div>
+    </div>
+
+    <div class="nav-bar">
+      <button class="btn btn-outline" onclick="prev(4)">&larr; Back</button>
+      <button class="btn btn-success" onclick="submitForm()">✓ Submit Form</button>
+    </div>
+  </div>
+
+  <!-- ── SUCCESS ── -->
+  <div class="section" id="sec-success">
+    <div class="success-wrap">
+      <div class="success-icon">🎉</div>
+      <h2>Form Submitted!</h2>
+      <p>Thank you for choosing Sujal Sandeep Pednekar. Your project request has been received. You'll hear back within 24 hours via WhatsApp or Email.</p>
+      <div>
+        <button class="pdf-btn gold" onclick="downloadPDF()">⬇ Download PDF Copy</button>
+      </div>
+      <p style="margin-top:1.5rem;font-size:0.78rem;color:var(--muted);">Keep this PDF for your records. It contains all project and payment details.</p>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ── STATE ──
+let currentStep = 0;
+const totalSteps = 5;
+const formData = {};
+
+// ── SET TODAY DATE ──
+document.getElementById('signDate').value = new Date().toLocaleDateString('en-IN', {day:'2-digit',month:'long',year:'numeric'});
+
+// ── NAVIGATION ──
+function showStep(n) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(n < totalSteps ? 'sec-' + n : 'sec-success').classList.add('active');
+  document.querySelectorAll('.step-dot').forEach((d, i) => {
+    d.classList.toggle('active', i <= n);
+  });
+  document.getElementById('step-label-text').textContent = n < totalSteps ? `Step ${n + 1} of ${totalSteps}` : 'Completed';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function next(step) {
+  if (!validate(step)) return;
+  currentStep = step + 1;
+  if (currentStep === 4) populateReview();
+  showStep(currentStep);
+}
+
+function prev(step) {
+  currentStep = step - 1;
+  showStep(currentStep);
+}
+
+// ── VALIDATION ──
+function showErr(id, show) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = show ? 'block' : 'none';
+}
+function markField(id, err) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('error', err);
+}
+
+function validate(step) {
+  let ok = true;
+  if (step === 0) {
+    const name = v('clientName'), email = v('clientEmail'), phone = v('clientPhone');
+    if (!name) { showErr('err-clientName', true); markField('clientName', true); ok = false; } else { showErr('err-clientName', false); markField('clientName', false); }
+    if (!email || !email.includes('@')) { showErr('err-clientEmail', true); markField('clientEmail', true); ok = false; } else { showErr('err-clientEmail', false); markField('clientEmail', false); }
+    if (!phone) { showErr('err-clientPhone', true); markField('clientPhone', true); ok = false; } else { showErr('err-clientPhone', false); markField('clientPhone', false); }
+  }
+  if (step === 1) {
+    const services = [...document.querySelectorAll('.check-item[data-checked="true"]')].map(c => c.dataset.value);
+    const desc = v('projectDesc'), dl = v('deadline');
+    if (!services.length) { showErr('err-service', true); ok = false; } else showErr('err-service', false);
+    if (!desc) { showErr('err-projectDesc', true); markField('projectDesc', true); ok = false; } else { showErr('err-projectDesc', false); markField('projectDesc', false); }
+    if (!dl) { showErr('err-deadline', true); markField('deadline', true); ok = false; } else { showErr('err-deadline', false); markField('deadline', false); }
+  }
+  if (step === 2) {
+    const total = v('totalPrice');
+    const pm = document.querySelector('.radio-item[data-name="payMethod"][data-checked="true"]');
+    if (!total || parseFloat(total) <= 0) { showErr('err-totalPrice', true); markField('totalPrice', true); ok = false; } else { showErr('err-totalPrice', false); markField('totalPrice', false); }
+    if (!pm) { showErr('err-payMethod', true); ok = false; } else showErr('err-payMethod', false);
+  }
+  if (step === 3) {
+    const allChecked = [...document.querySelectorAll('.term-item')].every(t => t.getAttribute('data-checked') === 'true');
+    const sn = v('signName');
+    if (!allChecked) { document.getElementById('err-terms').style.display = 'block'; ok = false; } else document.getElementById('err-terms').style.display = 'none';
+    if (!sn) { showErr('err-signName', true); markField('signName', true); ok = false; } else { showErr('err-signName', false); markField('signName', false); }
+  }
+  return ok;
+}
+
+function v(id) { return document.getElementById(id).value.trim(); }
+
+// ── CHECK / RADIO HELPERS ──
+document.addEventListener('DOMContentLoaded', function() {
+
+  // Service checkboxes — pure toggle on click
+  document.querySelectorAll('.check-item').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const isChecked = item.getAttribute('data-checked') === 'true';
+      item.setAttribute('data-checked', !isChecked);
+      item.classList.toggle('checked', !isChecked);
+      if (item.id === 'other-service-item') {
+        document.getElementById('other-service-wrap').classList.toggle('show', !isChecked);
+      }
+    });
+  });
+
+  // Terms checkboxes
+  document.querySelectorAll('.term-item').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const isChecked = item.getAttribute('data-checked') === 'true';
+      item.setAttribute('data-checked', !isChecked);
+      item.classList.toggle('checked', !isChecked);
+    });
+  });
+
+  // Radio buttons
+  document.querySelectorAll('.radio-item').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const name = item.dataset.name;
+      document.querySelectorAll(`.radio-item[data-name="${name}"]`).forEach(r => {
+        r.classList.remove('selected');
+        r.setAttribute('data-checked', 'false');
+      });
+      item.classList.add('selected');
+      item.setAttribute('data-checked', 'true');
+      if (name === 'payMethod') {
+        document.getElementById('other-pm-wrap').classList.toggle('show', item.dataset.value === 'Other');
+      }
+    });
+  });
+});
+
+function toggleTerm(el) { /* handled by event listener */ }
+
+function acceptAll() {
+  document.querySelectorAll('.term-item').forEach(item => {
+    item.classList.add('checked');
+    item.setAttribute('data-checked', 'true');
+  });
+}
+
+// selectRadio handled by DOMContentLoaded event listener
+
+// ── BUDGET CALC ──
+function calcPayments() {
+  const total = parseFloat(document.getElementById('totalPrice').value) || 0;
+  const adv = total * 0.5;
+  const rem = total - adv;
+  document.getElementById('advanceAmt').value = adv > 0 ? adv.toFixed(0) : '';
+  document.getElementById('remainingAmt').value = rem > 0 ? rem.toFixed(0) : '';
+  const card = document.getElementById('budgetCard');
+  if (total > 0) {
+    card.style.display = 'block';
+    const rev = document.getElementById('revisionCharge').value;
+    document.getElementById('bc-total').textContent = '₹' + total.toLocaleString('en-IN');
+    document.getElementById('bc-advance').textContent = '₹' + adv.toLocaleString('en-IN');
+    document.getElementById('bc-remaining').textContent = '₹' + rem.toLocaleString('en-IN');
+    document.getElementById('bc-revision').textContent = rev ? '₹' + parseFloat(rev).toLocaleString('en-IN') + '/revision' : '—';
+  } else {
+    card.style.display = 'none';
+  }
+}
+
+// ── POPULATE REVIEW ──
+function populateReview() {
+  const set = (id, val) => {
+    const el = document.getElementById(id);
+    if (!val || val.trim() === '') {
+      el.textContent = '—'; el.classList.add('empty');
+    } else {
+      el.textContent = val; el.classList.remove('empty');
+    }
+  };
+
+  set('rv-name', v('clientName'));
+  set('rv-biz', v('businessName'));
+  set('rv-email', v('clientEmail'));
+  set('rv-phone', v('clientPhone'));
+  set('rv-social', v('clientSocial'));
+
+  let services = [...document.querySelectorAll('.check-item[data-checked="true"]')].map(c => {
+    return c.dataset.value === 'Other' ? ('Other: ' + v('otherService')) : c.dataset.value;
+  }).join(', ');
+  set('rv-services', services);
+  set('rv-deadline', v('deadline') ? new Date(v('deadline')).toLocaleDateString('en-IN', {day:'2-digit',month:'long',year:'numeric'}) : '');
+  set('rv-desc', v('projectDesc'));
+  set('rv-style', v('styleRef'));
+
+  const total = parseFloat(document.getElementById('totalPrice').value) || 0;
+  set('rv-total', total ? '₹' + total.toLocaleString('en-IN') : '');
+  set('rv-advance', total ? '₹' + (total * 0.5).toLocaleString('en-IN') : '');
+  set('rv-remaining', total ? '₹' + (total * 0.5).toLocaleString('en-IN') : '');
+
+  const pmEl = document.querySelector('.radio-item[data-name="payMethod"][data-checked="true"]');
+  let pmVal = pmEl ? (pmEl.dataset.value === 'Other' ? v('otherPayMethod') : pmEl.dataset.value) : '';
+  set('rv-paymethod', pmVal);
+
+  const rev = document.getElementById('revisionCharge').value;
+  set('rv-revision', rev ? '₹' + parseFloat(rev).toLocaleString('en-IN') + ' per additional revision' : 'Not specified');
+
+  set('rv-sign', v('signName'));
+  set('rv-signdate', v('signDate'));
+
+  // store for PDF
+  formData.name = v('clientName');
+  formData.biz = v('businessName');
+  formData.email = v('clientEmail');
+  formData.phone = v('clientPhone');
+  formData.social = v('clientSocial');
+  formData.services = [...document.querySelectorAll('.check-item[data-checked="true"]')].map(c => {
+    return c.dataset.value === 'Other' ? ('Other: ' + v('otherService')) : c.dataset.value;
+  }).join(', ');
+  formData.deadline = v('deadline') ? new Date(v('deadline')).toLocaleDateString('en-IN', {day:'2-digit',month:'long',year:'numeric'}) : '';
+  formData.desc = v('projectDesc');
+  formData.style = v('styleRef');
+  formData.total = total;
+  formData.advance = total * 0.5;
+  formData.remaining = total * 0.5;
+  formData.payMethod = pmVal;  formData.revisionCharge = rev ? '₹' + parseFloat(rev).toLocaleString('en-IN') + ' per revision' : 'Not specified';
+  formData.signName = v('signName');
+  formData.signDate = v('signDate');
+}
+
+// ── SUBMIT ──
+function submitForm() {
+  currentStep = totalSteps;
+  showStep(totalSteps);
+}
+
+// ── PDF DOWNLOAD ──
+function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, M = 18, lh = 7;
+  let y = 0;
+
+  const addPage = () => { doc.addPage(); y = 20; };
+  const checkY = (extra = 0) => { if (y + extra > 272) addPage(); };
+
+  // ── Header ──
+  doc.setFillColor(26, 18, 7);
+  doc.rect(0, 0, W, 42, 'F');
+  doc.setFillColor(201, 168, 76);
+  doc.rect(0, 42, W, 1.5, 'F');
+
+  doc.setTextColor(201, 168, 76);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text('CLIENT ONBOARDING FORM', W / 2, 13, { align: 'center' });
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Sujal Sandeep Pednekar', W / 2, 24, { align: 'center' });
+
+  doc.setTextColor(201, 168, 76);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Freelance Design Studio', W / 2, 32, { align: 'center' });
+
+  doc.setTextColor(180, 180, 180);
+  doc.setFontSize(7.5);
+  doc.text(`Submitted: ${formData.signDate}`, W / 2, 39, { align: 'center' });
+
+  y = 52;
+
+  function sectionHead(title) {
+    checkY(12);
+    doc.setFillColor(245, 240, 230);
+    doc.rect(M - 2, y - 4.5, W - 2 * M + 4, 8, 'F');
+    doc.setFillColor(201, 168, 76);
+    doc.rect(M - 2, y - 4.5, 3, 8, 'F');
+    doc.setTextColor(26, 18, 7);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9.5);
+    doc.text(title, M + 4, y, {});
+    y += lh + 2;
+  }
+
+  function row(label, value) {
+    checkY(lh + 2);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(120, 110, 95);
+    doc.text(label.toUpperCase(), M, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(26, 18, 7);
+    const lines = doc.splitTextToSize(value || '—', W - M - 65);
+    doc.text(lines, 72, y);
+    y += Math.max(lh, lines.length * lh);
+  }
+
+  function divider() {
+    checkY(6);
+    doc.setDrawColor(220, 212, 197);
+    doc.setLineWidth(0.3);
+    doc.line(M, y, W - M, y);
+    y += 5;
+  }
+
+  // ── SECTION: Client Info ──
+  sectionHead('CLIENT INFORMATION');
+  row('Full Name', formData.name);
+  row('Business Name', formData.biz || '—');
+  row('Email Address', formData.email);
+  row('WhatsApp Number', formData.phone);
+  row('Instagram / Website', formData.social || '—');
+  y += 2; divider();
+
+  // ── SECTION: Project ──
+  sectionHead('PROJECT DETAILS');
+  row('Services Required', formData.services);
+  row('Deadline', formData.deadline);
+  row('Style / References', formData.style || '—');
+  y += 1;
+  // Description multi-line
+  checkY(12);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(120, 110, 95);
+  doc.text('PROJECT DESCRIPTION', M, y); y += 5;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(40, 35, 25);
+  const descLines = doc.splitTextToSize(formData.desc || '—', W - 2 * M);
+  descLines.forEach(line => { checkY(lh); doc.text(line, M, y); y += lh; });
+  y += 2; divider();
+
+  // ── SECTION: Payment ──
+  sectionHead('PAYMENT SUMMARY');
+
+  // Payment box
+  checkY(50);
+  doc.setFillColor(26, 18, 7);
+  doc.roundedRect(M - 2, y - 2, W - 2 * M + 4, 52, 3, 3, 'F');
+
+  const boxRows = [
+    ['Total Project Price', '₹' + formData.total.toLocaleString('en-IN')],
+    ['Advance Payment (50%)', '₹' + formData.advance.toLocaleString('en-IN')],
+    ['Remaining Balance', '₹' + formData.remaining.toLocaleString('en-IN')],
+    ['Payment Method', formData.payMethod || '—'],
+    ['Revision Charge', formData.revisionCharge],
+    ['Standard Revisions', '2 revisions included'],
+  ];
+
+  let bY = y + 5;
+  boxRows.forEach((r, i) => {
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(160, 150, 130);
+    doc.text(r[0], M + 4, bY);
+    doc.setFont('helvetica', 'bold'); doc.setTextColor(201, 168, 76);
+    doc.text(r[1], W - M - 4, bY, { align: 'right' });
+    if (i < boxRows.length - 1) {
+      doc.setDrawColor(50, 40, 25); doc.setLineWidth(0.2);
+      doc.line(M + 4, bY + 2.5, W - M - 4, bY + 2.5);
+    }
+    bY += 8;
+  });
+  y = bY + 6; divider();
+
+  // ── SECTION: Terms ──
+  sectionHead('TERMS & CONDITIONS ACCEPTED');
+  const terms = [
+    'Work begins only after advance payment is received.',
+    'Delivery timeline starts after all required content and files are submitted.',
+    'Final editable/source files not included unless agreed separately.',
+    'Final files delivered only after full payment.',
+    'Advance payment is non-refundable once work has started.',
+    'Client is responsible for checking spelling, content, and approvals.',
+    'Designer may showcase work in portfolio/social media unless privacy requested.',
+  ];
+  terms.forEach(t => {
+    checkY(lh + 1);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(50, 45, 35);
+    doc.text('✓', M, y);
+    const tLines = doc.splitTextToSize(t, W - M - 30);
+    doc.text(tLines, M + 6, y);
+    y += Math.max(lh, tLines.length * lh) + 1;
+  });
+  y += 2; divider();
+
+  // ── SECTION: Signature ──
+  sectionHead('AGREEMENT & SIGNATURE');
+  row('Signed By', formData.signName);
+  row('Date', formData.signDate);
+  row('Agreed To', 'All 7 terms and conditions');
+
+  // Signature line
+  checkY(20);
+  y += 5;
+  doc.setDrawColor(26, 18, 7); doc.setLineWidth(0.5);
+  doc.line(M, y, M + 70, y);
+  doc.setFont('helvetica', 'italic'); doc.setFontSize(8); doc.setTextColor(120, 110, 95);
+  doc.text('Client Signature', M, y + 5);
+  doc.text(formData.signDate, M + 100, y + 5);
+
+  // ── Footer ──
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= pageCount; p++) {
+    doc.setPage(p);
+    doc.setFillColor(245, 240, 230);
+    doc.rect(0, 285, W, 12, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(140, 130, 110);
+    doc.text('Sujal Sandeep Pednekar — Freelance Design Studio', M, 292);
+    doc.text(`Page ${p} of ${pageCount}`, W - M, 292, { align: 'right' });
+  }
+
+  doc.save(`Design-Brief_${formData.name.replace(/\s+/g,'-')}_${new Date().toISOString().slice(0,10)}.pdf`);
+}
+</script>
+</body>
+</html>
